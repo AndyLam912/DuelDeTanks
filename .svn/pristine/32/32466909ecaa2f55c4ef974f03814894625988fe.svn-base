@@ -1,0 +1,188 @@
+package aaplication;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import fenetresecondaire.APropos;
+import fenetresecondaire.ChoixDeTerrain;
+import fenetresecondaire.ConceptScientifique;
+import fenetresecondaire.Instructions;
+import fenetresecondaire.InterfaceBataille;
+import interfaces.ChoixTerrainListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.SwingConstants;
+
+/**
+ * Classe qui permet de créer le menu du jeu et de ses composants et de le
+ * démarrer
+ * 
+ * @author Andy Lam
+ *
+ *
+ */
+public class App10DuelDeChars extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JButton btnJouer;
+	private JButton btnInstructions;
+	private JButton btnConceptsScientifiques;
+	private JButton btnPropos;
+	private JLabel lblTitre;
+	private JMenuBar menuBar;
+	private JMenu mnMenu;
+	private JMenuItem mntmQuitter;
+	private static App10DuelDeChars frame = new App10DuelDeChars();
+	private InterfaceBataille bataille;
+	private ChoixDeTerrain fenChoixTerrain;
+	private Instructions fenInstruction;
+	private APropos fenAPropos;
+	private ConceptScientifique fenConcepts;
+
+	/**
+	 * Démarrage de l'application
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					frame.setLocationRelativeTo(null);
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Création de l'application
+	 */
+	public App10DuelDeChars() {
+		bataille = new InterfaceBataille(this);
+		fenChoixTerrain = new ChoixDeTerrain();
+		fenChoixTerrain.setApp(this);
+
+		fenInstruction = new Instructions();
+		fenAPropos = new APropos();
+		fenConcepts = new ConceptScientifique();
+
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 973, 690);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		setTitle("Duel de chars");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		mnMenu = new JMenu("Menu");
+		menuBar.add(mnMenu);
+
+		mntmQuitter = new JMenuItem("Quitter");
+		mntmQuitter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.exit(0);
+			}
+		});
+		mnMenu.add(mntmQuitter);
+
+		btnJouer = new JButton("Jouer");
+		btnJouer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				// debut
+				fenChoixTerrain.setVisible(true);
+				frame.setVisible(false);
+				// fin
+			}
+		});
+		btnJouer.setBounds(328, 204, 300, 74);
+		contentPane.add(btnJouer);
+
+		btnInstructions = new JButton("Instructions");
+		btnInstructions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				instructionVisible();
+			}
+		});
+		btnInstructions.setBounds(328, 288, 300, 74);
+		contentPane.add(btnInstructions);
+
+		btnConceptsScientifiques = new JButton("Concepts Scientifiques");
+		btnConceptsScientifiques.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				conceptsVisible();
+			}
+		});
+		btnConceptsScientifiques.setBounds(328, 373, 300, 74);
+		contentPane.add(btnConceptsScientifiques);
+
+		btnPropos = new JButton("\u00C0 propos");
+		btnPropos.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aProposVisible();
+			}
+		});
+		btnPropos.setBounds(328, 458, 300, 74);
+		contentPane.add(btnPropos);
+
+		lblTitre = new JLabel("Duel de chars d'assaut");
+		lblTitre.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTitre.setFont(new Font("Tahoma", Font.BOLD, 34));
+		lblTitre.setBounds(196, 66, 592, 114);
+		contentPane.add(lblTitre);
+
+		fenChoixTerrain.addChoixTerrainListener(new ChoixTerrainListener() {
+			public void terrainChange(String choixTerrain) {
+				bataille.changeTerrain(choixTerrain);
+			}
+		});
+	}
+
+	/**
+	 * méthode qui permet d'afficher la fenêtre de jeu du champ de bataille
+	 */
+	public void initInterfaceJeu() {
+		bataille.setVisible(true);
+		bataille.getFocus();
+		this.setVisible(false);
+	}
+
+	/**
+	 * Affiche la fenêtre des instructions
+	 */
+	public void instructionVisible() {
+		fenInstruction.setVisible(true);
+	}
+
+	/**
+	 * Affiche la fenêtre les informations à propos des auteurs
+	 */
+	public void aProposVisible() {
+		fenAPropos.setVisible(true);
+	}
+
+	/**
+	 * Affiche la fenêtre les concepts scientifiques utilisés dans la création de ce
+	 * programme
+	 */
+	public void conceptsVisible() {
+		fenConcepts.setVisible(true);
+	}
+
+}

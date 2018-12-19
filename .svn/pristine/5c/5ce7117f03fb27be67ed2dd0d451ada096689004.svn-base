@@ -1,0 +1,97 @@
+package zoneanimation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.Ellipse2D;
+
+import javax.swing.JPanel;
+
+import objetsdessinables.Vecteur;
+import objetsdessinables.VecteurGraphique;
+
+/**
+ * Classe qui permet de dessiner une rose des vents selon ses propriétés 
+ * @author Andy Lam
+ *
+ */
+public class Vent extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+	private final double FORCE_MAX = 40.0;
+	private final double FORCE_MIN = 10.0;
+	private final double INCERTITUDE_DESSIN = 1.0;
+	private static double rayonDessin;
+	private Vecteur vent;
+	private VecteurGraphique ventDessin = new VecteurGraphique(0,0);
+	private boolean premiereFois = true;
+	private double angleVent;
+	private Ellipse2D cercle;
+	private double moduleForce;
+	private double proportion; 
+	
+	
+	
+	
+	/**
+	 * Crée un la direction d'un vent et dessine le composant graphique du vent
+	 */
+	public Vent() {
+		ventAleatoire();
+	}
+	
+	/**
+	 *  Méthode qui permet de dessiner le composant du vent
+	 * @param g qui est le contexte graphique 
+	 * 
+	 */
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+		
+		if (premiereFois) {
+			rayonDessin = (getWidth()/2) -INCERTITUDE_DESSIN;
+			cercle = new Ellipse2D.Double(0, 0,rayonDessin*2,rayonDessin*2);
+			premiereFois = false;
+			
+		}
+		
+		g2d.setColor(new Color(240,240,240));
+		g2d.fill(cercle);
+		g2d.setColor(Color.BLACK);
+		g2d.draw(cercle);
+	
+		ventDessin = new VecteurGraphique(Math.cos(angleVent)*rayonDessin*proportion, Math.sin(angleVent) * rayonDessin*proportion);
+		ventDessin.setOrigineXY(getWidth()/2, getHeight()/2);
+		ventDessin.dessiner(g2d, null);
+		
+		
+		
+	}
+	/**
+	 * Methode qui choisi au hasard la direction du vent et la redessine dans le composant graphique
+	 */
+	public void ventAleatoire() {
+		moduleForce = (Math.random()* (FORCE_MAX -FORCE_MIN)) + FORCE_MIN;
+		angleVent = Math.random() * Math.PI*2;
+		double x = moduleForce * Math.cos(angleVent);
+		double y = moduleForce * Math.sin(angleVent);
+		vent = new Vecteur(x, y);
+		proportion = moduleForce/FORCE_MAX;
+		repaint();
+	}
+	/**
+	 * Methode qui retourne le vecteur de force du vent
+	 * @return le vecteur de force du vent
+	 */
+	public Vecteur getVent() {
+		return vent;
+	}
+	/**
+	 * Methode qui retourne le module de la force du vent
+	 * @return Le module de la force du vent en Newton
+	 */
+	public double getModuleForce() {
+		return moduleForce;
+	}
+}

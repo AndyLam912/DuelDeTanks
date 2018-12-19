@@ -1,0 +1,124 @@
+package objetsdessinables;
+
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+
+import interfaces.Dessinable;
+
+/**
+ * Classe permettant de dessiner le champ electrique
+ * 
+ * @author Andy Lam
+ *
+ */
+public class ChampElectrique implements Dessinable {
+	private final double CONST_K = 9.00 * Math.pow(10, 9);
+	private final int NB_DE_CERCLE = 5;
+	private final double INCREMENT_CERCLE = 40.0;
+	private double x;
+	private double y;
+	// private double tailleChamp = 200.0;
+	private double charge;
+
+	/**
+	 * Crée le champ electrique à l'aide des proprietes
+	 * 
+	 * @param x
+	 *            La position en x du champ electrique
+	 * @param y
+	 *            La position en y du champ electrique
+	 * @param force
+	 *            La force electrique generer par le champ electrique
+	 */
+	public ChampElectrique(double x, double y, double charge) {
+		this.x = x;
+		this.y = y;
+		this.charge = charge;
+
+	}
+
+	/**
+	 * Méthode qui permet de dessiner le champ electrique
+	 * 
+	 * @param g2d
+	 *            qui est le contexte graphique 2D
+	 * @param mat
+	 *            Matrice de transformation qui va être appliqué sur les éléments du
+	 *            dessin
+	 */
+	@Override
+	public void dessiner(Graphics2D g2d, AffineTransform mat) {
+		Composite compInitiale = g2d.getComposite();
+		for (int i = 1; i < NB_DE_CERCLE; i++) {
+			// Ellipse2D champ = new Ellipse2D.Double(x - tailleChamp / (2*i) , y -
+			// tailleChamp / (2*i), tailleChamp / i, tailleChamp/i);
+			Ellipse2D champ = new Ellipse2D.Double(x - i * INCREMENT_CERCLE / 2, y - i * INCREMENT_CERCLE / 2,
+					i * INCREMENT_CERCLE, INCREMENT_CERCLE * i);
+
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1 - i * 0.2f));
+			g2d.setColor(Color.BLUE);
+
+			g2d.fill(mat.createTransformedShape(champ));
+		}
+		g2d.setComposite(compInitiale);
+
+	}
+
+	/**
+	 * Méthode qui retourne la force electrique sur le projectile. Si le projectile
+	 * n'est pas à l'intérieur de la zone du champ électrique, le force sera null
+	 * 
+	 * @param projectile
+	 *            le projectile dans lequel on calcule la force electrique
+	 * @return le vecteur de force electrique qui va affecté le projectile
+	 */
+	public Vecteur getForceElectrique(Projectile projectile) {
+		double distanceX = projectile.getX() - this.x;
+		double distanceY = projectile.getY() - this.y;
+		Vecteur distance = new Vecteur(distanceX, distanceY);
+		// A CHANGER POUR UNE CONSTANTE
+		double chargeProjectile = projectile.getChargeProjectile();
+		if (distance.module() - 5 > INCREMENT_CERCLE * NB_DE_CERCLE / 2.0) {
+			return new Vecteur(0, 0);
+		} else {
+			try {
+				Vecteur rChapeau = distance.normalise();
+				// Les charges sont en microcoulombs et les calculs sont en coulombs. Ainsi, il
+				// faut multiplier chacune des charges par Math.pow(10,-6)
+				Vecteur forceElec = rChapeau.multiplie(CONST_K * charge
+						* (Math.pow(10, -3) * chargeProjectile * (Math.pow(10, -3) / Math.pow(distance.module(), 2))));
+				System.out.println("X: " + forceElec.getX() + "      ,     Y: " + forceElec.getY());
+				return forceElec;
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				System.out.println("Erreur dans le calcul de la force du champ electrique!");
+				return new Vecteur(0, 0);
+			}
+		}
+
+	}
+
+	/**
+	 * Méthode qui permet de fixer la position du champ électrique
+	 * 
+	 * @param x
+	 *            la position en x du champ électrique
+	 * @param y
+	 *            la position en y du champ électrique
+	 */
+	public void setPosition(double x, double y) {
+		this.x = x;
+		this.y = y;
+	}
+
+	public void setCharge(double charge) {
+		this.charge = charge;
+	}
+
+}

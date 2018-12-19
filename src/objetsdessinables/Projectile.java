@@ -1,0 +1,235 @@
+package objetsdessinables;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+
+import interfaces.Dessinable;
+
+/**
+ * classe qui créé un projectile lancé depuis un char et soumis à plusieures
+ * forces
+ * 
+ * @author léo-paul lapointe
+ *
+ */
+public class Projectile implements Dessinable {
+
+	private final int DIAMETRE_PROJECTILE = 5;
+	private final double CHARGE = 1;
+	private int masseProjectile;
+	private double chargeProjectile;
+	private Ellipse2D projectile;
+	private double x, y, forceGravitationnelle, accX, accY, vitX, vitY;
+	private boolean grenadeElectrique;
+	private boolean chargePlus;
+	private Area aireProjectile;
+	private Color couleurProjectile = Color.BLACK;
+
+	/**
+	 * créé le projectile
+	 * 
+	 * @param x
+	 *            position du projectile en x
+	 * @param y
+	 *            position du projectile en y
+	 * @param angleCanon
+	 *            angle auquel le projectile est lancé
+	 * @param vitesseDeDepart
+	 *            vitesse à laquelle le projectile est lancé
+	 * @param masseProjectile
+	 *            masse du projectile
+	 * @param forceGravitationnelle
+	 *            force de gravité
+	 * @param LONGUEUR_CANON
+	 *            la longueure du canon du char
+	 * @param HAUTEUR_CHAR
+	 *            la hauteur du char
+	 * @param ventActive
+	 *            la force du vent est activée ou non
+	 */
+	public Projectile(double x, double y, double angleCanon, double angleTerrain, double vitesseDeDepart,
+			int masseProjectile, double forceGravitationnelle, int LONGUEUR_CANON, int LARGEUR_CANON,
+			double HAUTEUR_CHAR, boolean grenadeElectrique, boolean chargePlus) {
+
+		this.masseProjectile = masseProjectile;
+		this.forceGravitationnelle = forceGravitationnelle;
+		this.x = x - DIAMETRE_PROJECTILE / 2 + Math.sin(angleTerrain) * (HAUTEUR_CHAR / 2 + LARGEUR_CANON / 2)
+				+ Math.cos(angleCanon + angleTerrain) * LONGUEUR_CANON;
+		this.y = y - DIAMETRE_PROJECTILE / 2 - (Math.cos(angleTerrain) * (HAUTEUR_CHAR / 2 + LARGEUR_CANON / 2))
+				+ (Math.sin(angleCanon + angleTerrain) * LONGUEUR_CANON);
+		this.grenadeElectrique = grenadeElectrique;
+		this.chargePlus = chargePlus;
+		this.vitX = Math.cos(angleCanon + angleTerrain) * vitesseDeDepart;
+		this.vitY = Math.sin(angleCanon + angleTerrain) * vitesseDeDepart;
+		if (chargePlus)
+			this.chargeProjectile = CHARGE;
+		if (!chargePlus)
+			this.chargeProjectile = -CHARGE;
+
+	}
+
+	/**
+	 * créé l'aire associée au projectile
+	 * 
+	 * @param mat
+	 *            la matrice de transformation
+	 */
+	public void creerAireProjectile(AffineTransform mat) {
+		projectile = new Ellipse2D.Double(x, y, DIAMETRE_PROJECTILE, DIAMETRE_PROJECTILE);
+		aireProjectile = new Area(mat.createTransformedShape(projectile));
+	}
+
+	/**
+	 * dessine le projectile
+	 */
+	@Override
+	public void dessiner(Graphics2D g2d, AffineTransform mat) {
+		creerAireProjectile(mat);
+		g2d.setColor(couleurProjectile);
+		g2d.fill(mat.createTransformedShape(projectile));
+	}
+
+	/**
+	 * calcule sans vent l'accélération du projectile
+	 * 
+	 * @param forceElectrique
+	 *            la force électrique
+	 * @param champPresent
+	 *            si un champ est présent
+	 */
+	public void acceleration(Vecteur forceElectrique, boolean champPresent) {
+		accX = 0;
+		accY = forceGravitationnelle / masseProjectile;
+		if (champPresent) {
+			accX += forceElectrique.getX() / masseProjectile;
+			accY += forceElectrique.getY() / masseProjectile;
+		}
+	}
+
+	/**
+	 * calcule l'accélération du projectile avec vent
+	 * 
+	 * @param vent
+	 *            la force du vent
+	 * @param forceElectrique
+	 *            la force électrique
+	 * @param champPresent
+	 *            si un champ est présent
+	 */
+	public void accelerationVent(Vecteur vent, Vecteur forceElectrique, boolean champPresent) {
+		accX = vent.getX() / masseProjectile;
+		accY = vent.getY() / masseProjectile + forceGravitationnelle / masseProjectile;
+		if (champPresent) {
+			accX += forceElectrique.getX() / masseProjectile;
+			accY += forceElectrique.getY() / masseProjectile;
+		}
+	}
+
+	/**
+	 * calcule la vitesse du projectile à un moment précis
+	 * 
+	 * @param temps
+	 *            moment où la vitesse est calculée
+	 */
+	public void vitesse(double temps) {
+		vitX = vitX + accX * temps;
+		vitY = vitY + accY * temps;
+	}
+
+	/**
+	 * calcule la position du projectile à un moment précis
+	 * 
+	 * @param temps
+	 *            moment où la position est calculée
+	 */
+	public void position(double temps) {
+		x = x + vitX * temps;
+		y = y + vitY * temps;
+	}
+
+	/**
+	 * retourne l'aire forceElectrique.getX()/masseProjectile
+	 * 
+	 * @return l'aire du projectile
+	 */
+	public Area getAireProjectile() {
+		return aireProjectile;
+	}
+
+	/**
+	 * retourne la vitesse du projectile
+	 * 
+	 * @return la vitesse du projectile
+	 */
+	public double getVitesse() {
+		return (Math.sqrt(Math.pow(vitX, 2) + Math.pow(vitY, 2)));
+	}
+
+	/**
+	 * retourne la position en x du projectile
+	 * 
+	 * @return la position en x du projectile
+	 */
+	public double getX() {
+		return x;
+	}
+
+	/**
+	 * retourne la position en y du projectile
+	 * 
+	 * @return la position en y du projectile
+	 */
+	public double getY() {
+		return y;
+	}
+
+	/**
+	 * retourne la masse du projectile en kg
+	 * 
+	 * @return la masse du projectile en kg
+	 */
+	public int getMasseProjectile() {
+		return masseProjectile;
+	}
+
+	/**
+	 * retourne si oui ou non le projectile est une grenade électrique
+	 * 
+	 * @return si oui ou non le projectile est une grenade électrique
+	 */
+	public boolean isGrenadeElectrique() {
+		return grenadeElectrique;
+	}
+
+	/**
+	 * retourne si oui ou non la charge du projectile est plus
+	 * 
+	 * @return si oui ou non la charge du projectile est plus
+	 */
+	public boolean isChargePlus() {
+		return chargePlus;
+	}
+
+	/**
+	 * retourne la charge du projectile
+	 * 
+	 * @return la charge du projectile
+	 */
+	public double getChargeProjectile() {
+		return chargeProjectile;
+	}
+
+	/**
+	 * permet de changer la couleur du projectile
+	 * 
+	 * @param couleurProjectile
+	 *            la nouvelle couleur
+	 */
+	public void setCouleurProjectile(Color couleurProjectile) {
+		this.couleurProjectile = couleurProjectile;
+	}
+
+}

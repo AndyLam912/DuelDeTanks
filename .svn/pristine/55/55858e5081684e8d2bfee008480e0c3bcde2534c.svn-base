@@ -1,0 +1,7 @@
+package interfaces;
+
+import java.util.EventListener;
+
+public interface ChoixTerrainListener extends EventListener{
+	public void terrainChange(String choixTerrain);
+}

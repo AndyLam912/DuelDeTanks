@@ -1,0 +1,230 @@
+package objetsdessinables;
+
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import interfaces.Dessinable;
+
+/**
+ * Classe qui permet de dessiner un terrain et de faire des calculs par rapport
+ * au terrain
+ * 
+ * @author Andy Lam
+ *
+ */
+public class Terrain implements Dessinable {
+	private double tailleHorizon;
+	private double tailleVerti;
+	private double[] pointsTerrain;
+	private int dx = 2;
+	private Area aireTerrain;
+	private Shape formeTerrain;
+
+	/**
+	 * Crée un terrain avec ses proprietes
+	 * 
+	 * @param fichier
+	 *            Lecture d'un fichier pour mettre les points du heightfield
+	 * @param tailleHorizon
+	 *            La longueur horizontale du terrain en metres
+	 * @param tailleVerti
+	 *            La longueur maximale du terrain en metres
+	 */
+	public Terrain(double tailleHorizon, double tailleVerti) {
+
+		this.tailleHorizon = tailleHorizon;
+		this.tailleVerti = tailleVerti;
+		pointsTerrain = new double[(int) (tailleHorizon / dx)];
+	}
+
+	/**
+	 * Méthode qui permet de dessiner le terrain
+	 * 
+	 * @param g2d
+	 *            qui est le contexte graphique 2D
+	 * @param mat
+	 *            Matrice de transformation qui va être appliqué sur les éléments du
+	 *            dessin
+	 */
+	@Override
+	public void dessiner(Graphics2D g2d, AffineTransform mat) {
+
+		Graphics2D g2dLocale = (Graphics2D) g2d.create();
+		Path2D.Double path = new Path2D.Double();
+		//g2dLocale.setColor(new Color(153, 255, 25));
+		boolean premiereFois = true;
+		for (int i = 0; i < pointsTerrain.length; i++) {
+			if (premiereFois) {
+				path.moveTo(i * tailleHorizon / pointsTerrain.length, pointsTerrain[i]);
+				premiereFois = false;
+			} else {
+				path.lineTo(i * tailleHorizon / pointsTerrain.length, pointsTerrain[i]);
+			}
+		}
+
+		path.lineTo(tailleHorizon, tailleVerti);
+		path.lineTo(0, tailleVerti);
+		path.closePath();
+		aireTerrain = new Area(mat.createTransformedShape(path));
+
+		formeTerrain = mat.createTransformedShape(path);
+		g2dLocale.fill(mat.createTransformedShape(path));
+		g2dLocale.dispose();
+	}
+
+	/**
+	 * Methode qui permet de retourner la hauteur en metres sur un point
+	 * 
+	 * @param i
+	 *            le point x dans le heightfield
+	 * @return la hauteur en metre sur la position du i dans le heightfield
+	 */
+	public double getPointsTerrain(int i) {
+		return pointsTerrain[i];
+	}
+
+	/**
+	 * Methode qui fixe la hauteur du heightfield sur une position horizontale
+	 * 
+	 * @param i
+	 *            le point x dans le heightfield
+	 * @param hauteurla
+	 *            hauteur en metre sur la position du i dans le heightfield
+	 */
+	public void setPointsTerrain(int i, double hauteur) {
+		pointsTerrain[i] = hauteur;
+
+	}
+
+	/**
+	 * Methode qui permet de retouner l'angle de la tengente sur le terrain sur une
+	 * position
+	 * 
+	 * @param posX1
+	 *            La position x du heightfield a evaluer
+	 * @param posX2
+	 *            La prochaine position x du heightfield selon la direction a
+	 *            evaluer
+	 * @return L'angle sur une position du terrain, en radians
+	 */
+
+	public double angleSurUnPoint(int posX1, int posX2) {
+
+		double deltaY = pointsTerrain[posX2 / dx] - pointsTerrain[(posX1) / dx];
+		double deltaX = posX2 - (posX1);
+		double angleRad = Math.atan(deltaY / deltaX);
+		return angleRad;
+
+	}
+
+	/**
+	 * Methode qui retourne la distance en x entre deux points du heightfield
+	 * 
+	 * @return La distance en x entre deux points du heightfield
+	 */
+	public int getDx() {
+		return dx;
+	}
+
+	/**
+	 * Methode qui retourne l'aire du terrain actuelle
+	 * 
+	 * @return l'aire du terrain actuelle
+	 */
+	public Area getAireTerrain() {
+		return aireTerrain;
+	}
+
+	/**
+	 * Methode qui permet de calculer la deformation du terrain lors d'une explosion
+	 * 
+	 * @param a
+	 *            la position en x de l'explosion
+	 * @param b
+	 *            la position en y de l'explosion
+	 * @param rayonExplosion
+	 *            le rayon de l'explosion en metres
+	 */
+	public void explosion(double a, double b, double rayonExplosion, double pixelParUnite) {
+
+		for (int i = 0; i < rayonExplosion * 2; i++) {
+			// A partir de la formule (x -a)^2 + (y - b)^2 = R^2
+			double gaucheADroite = (a - rayonExplosion) + i;
+			if (gaucheADroite < 0) {
+				continue;
+			}
+			if (gaucheADroite > (pointsTerrain.length-1)  * dx) {
+				break;
+			}
+			double pointInferieurCercle = (b + Math.sqrt(Math.pow(rayonExplosion, 2) - Math.pow(gaucheADroite - a, 2)))
+					/ pixelParUnite;
+			double pointSuperieurCercle = (b - Math.sqrt(Math.pow(rayonExplosion, 2) - Math.pow(gaucheADroite - a, 2)))
+					/ pixelParUnite;
+			//double pointTerrain = (pointsTerrain[(int) (Math.round((gaucheADroite) / dx))] * pixelParUnite);
+			// if(pointInferieurCercle > )
+
+			if ((Math.pow(gaucheADroite - (a), 2)
+					+ Math.pow((pointsTerrain[(int) (Math.round((gaucheADroite) / dx))] * pixelParUnite 
+					) - b, 2) < Math.pow(rayonExplosion, 2))) {
+
+				pointsTerrain[(int) (Math.round((gaucheADroite) / dx))] = pointInferieurCercle;
+			}
+
+			else if (b >= (pointsTerrain[(int) (Math.round((gaucheADroite) / dx))] * pixelParUnite)) {
+
+				double explosionCreuser = pointSuperieurCercle - pointInferieurCercle;
+				pointsTerrain[(int) (Math
+						.round((gaucheADroite) / dx))] = pointsTerrain[(int) (Math.round((gaucheADroite) / dx))]
+								- explosionCreuser;
+			}
+
+		}
+
+	}
+
+	/**
+	 * Méthode qui permet de changer les points du heightfield du terrain selon une
+	 * fonction dépandanment du choix du terrain
+	 * 
+	 * @param choixTerrain
+	 *            le nom du choix du terrain choisi par l'utilisateur
+	 */
+	public void changePointsTerrain(String choixTerrain) {
+
+		pointsTerrain = new double[(int) (tailleHorizon / dx)];
+		switch (choixTerrain) {
+		case "Terre":
+			for (int i = 0; i < pointsTerrain.length; i++) {
+				pointsTerrain[i] = tailleVerti *7.0/10.0;
+			}
+			break;
+		case "Lune":
+
+			for (int i = 0; i < pointsTerrain.length; i++) {
+				pointsTerrain[i] = tailleVerti / 10.0 * Math.sin(i / 50.0) + tailleVerti - tailleVerti / 2 + 50;
+			}
+
+			break;
+		case "Mars":
+			for (int i = 0; i < pointsTerrain.length; i++) {
+				pointsTerrain[i] = Math.sin(i / 70.0) * tailleVerti / 2.0 * Math.cos(i / 110.0) + tailleVerti / 3.0;
+			}
+			break;
+		case "Neptune":
+			for (int i = 0; i < pointsTerrain.length; i++) {
+				pointsTerrain[i] = tailleVerti / 4.0 * Math.cos(i / 80.0) + (5.0 * tailleVerti / 9.0);
+			}
+			break;
+		}
+
+	}
+	/**
+	 * Methode qui permet de retourner la forme du terrain actuelle
+	 * @return la forme du terrain actuelle
+	 */
+	public Shape getFormeTerrain() {
+		return formeTerrain;
+	}
+}

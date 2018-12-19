@@ -1,0 +1,603 @@
+package fenetresecondaire;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import aaplication.App10DuelDeChars;
+import interfaces.FlecheListener;
+import interfaces.GagnantListener;
+import interfaces.PositionsEtTempsListener;
+import zoneanimation.Fleches;
+import zoneanimation.Vent;
+import zoneanimation.ZoneDAnimation;
+
+/**
+ * classe de démarrage de l'application et interface
+ * 
+ * @author léo-paul lapointe
+ * @author Andy Lam
+ *
+ */
+public class InterfaceBataille extends JFrame {
+
+	private final int VITESSE_INIT_BOULET = 100;
+	private final int MASSE_INIT_BOULET = 15;
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JMenuBar menuBar;
+	private JButton btnRinitialiser;
+	private JMenu mnMenu;
+	private JMenuItem mntmInstructions;
+	private JMenuItem mntmPropos;
+	private JMenuItem mntmConceptsScientifiques;
+	private JMenuItem mntmMenuPrincipal;
+	private JLabel lblAuTourDu;
+	private JPanel panSortiesBoulet;
+	private JLabel lblVitesseDuProjectileIm;
+	private JLabel lblPositionDuProjectileIm;
+	private JLabel lblPositionDuProjectile;
+	private JPanel panSortiesChar;
+	private JLabel lblPositionDuChar;
+	private JLabel lblPositionDuChar_1;
+	private JPanel panSortieTemps;
+	private JLabel lblTempscoul;
+	private JSeparator separator;
+	private JSeparator separator_1;
+	private JLabel lblNiveauDessence;
+	private JProgressBar prgBarNiveauEssence;
+	private JButton btnTirer;
+	private JButton btnPlayPause;
+	private JSeparator separator_2;
+	private JButton btnPas;
+	private JCheckBox chckbxAfficherLesVecteurs;
+	private JPanel panGravité;
+	private JLabel lblForceDeLa;
+	private JLabel lblMasseDuProjectile;
+	private JSlider sliMasseBoulet;
+	private JPanel panProjectile;
+	private JLabel lblVitesseInitialeDu;
+	private JSlider sliderVitesseProjectile;
+	private JLabel lblChargeDuProjectile;
+	private JRadioButton radioButton;
+	private JRadioButton radioButton_1;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JLabel lblChargeGnrPar;
+	private JSpinner spnChampGrenade;
+	private JCheckBox chckbxPrsenceDuVent;
+	private JPanel panVent;
+	private ZoneDAnimation zoneDAnimation;
+	private FenGagnant fenGagnant;
+	private JMenuItem mntmQuitter;
+	private Vent composantVent;
+	private JLabel lblPosCharX;
+	private JLabel lblPosCharY;
+	private JLabel lblPosProjectileX;
+	private JLabel lblPosProjectileY;
+	private JLabel lblDuelDeChars;
+	private JLabel lblTemps;
+	private Fleches fleches;
+	private JLabel lblVitprojectile;
+	private static App10DuelDeChars frame;
+	private boolean enPause = false;
+	private JPanel panel;
+	private JRadioButton rdbtnObusExplosif;
+	private JRadioButton rdbtnGrenadeElectrique;
+	private final ButtonGroup buttonGroup_1 = new ButtonGroup();
+	private JLabel lblControle;
+	
+
+
+	// léo-paul
+	/**
+	 * Crée la fenêtre du jeu
+	 */
+	public InterfaceBataille(App10DuelDeChars app) {
+		setLocationRelativeTo(null);
+		frame = app;
+		setTitle("Duel de chars");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1440, 810);
+
+		menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		zoneDAnimation = new ZoneDAnimation();
+		btnRinitialiser = new JButton("R\u00E9initialiser");
+		btnRinitialiser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				reinitialiser();
+			}
+		});
+
+		mnMenu = new JMenu("Menu");
+		menuBar.add(mnMenu);
+
+		mntmInstructions = new JMenuItem("Instructions");
+		mntmInstructions.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				app.instructionVisible();
+			}
+		});
+		mnMenu.add(mntmInstructions);
+
+		mntmPropos = new JMenuItem("\u00C0 propos");
+		mntmPropos.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				app.aProposVisible();
+			}
+		});
+		mnMenu.add(mntmPropos);
+		
+
+		mntmConceptsScientifiques = new JMenuItem("Concepts scientifiques");
+		mntmConceptsScientifiques.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				app.conceptsVisible();;
+			}
+		});
+		mnMenu.add(mntmConceptsScientifiques);
+
+		mntmMenuPrincipal = new JMenuItem("Menu principal");
+		mntmMenuPrincipal.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				app.setVisible(true);
+				setVisible(false);
+			}
+		});
+		mnMenu.add(mntmMenuPrincipal);
+
+		mntmQuitter = new JMenuItem("Quitter");
+		mntmQuitter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.exit(0);
+			}
+		});
+		mnMenu.add(mntmQuitter);
+		menuBar.add(btnRinitialiser);
+
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		zoneDAnimation.addFlecheListener(new FlecheListener() {
+			@Override
+			public void flecheHaut(boolean allumer) {
+				fleches.setAllumeHaut(allumer);
+			}
+			@Override
+			public void flecheBas(boolean allumer) {
+				fleches.setAllumeBas(allumer);
+			}
+			@Override
+			public void flecheGauche(boolean allumer) {
+				fleches.setAllumeGauche(allumer);
+			}
+			@Override
+			public void flecheDroite(boolean allumer) {
+				fleches.setAllumeDroite(allumer);
+			}
+		});
+		zoneDAnimation.addCharListener(new PositionsEtTempsListener() {
+			@Override
+			public void changementPosChar(double x, double y) {
+				lblPosCharX.setText(Double.toString(x));
+				lblPosCharY.setText(Double.toString(y));
+				prgBarNiveauEssence.setValue(zoneDAnimation.getBarreEssence());
+			}
+
+			@Override
+			public void changementPosProjectile(double x, double y) {
+				lblPosProjectileX.setText(Double.toString(x));
+				lblPosProjectileY.setText(Double.toString(y));
+
+			}
+
+			@Override
+			public void changementTemps(double temps) {
+				lblTemps.setText(Double.toString(temps));
+
+			}
+
+			@Override
+			public void changementVitesseProjectile(double vitesse) {
+				lblVitprojectile.setText(Double.toString(vitesse));
+
+			}
+		});
+		zoneDAnimation.addGagnantListener(new GagnantListener() {
+
+
+			@Override
+			public void declarationGagnant(boolean gagnant) {
+				// TODO Auto-generated method stub
+				fenGagnant.couleurGagnant(gagnant);
+				fenGagnant.setVisible(true);
+				
+			}
+		
+		});
+
+		zoneDAnimation.setBounds(10, 11, 1150, 550);
+		zoneDAnimation.setBackground(new Color(0,191,255));
+		contentPane.add(zoneDAnimation);
+		
+		fenGagnant = new FenGagnant();
+		fenGagnant.setApp(this);
+
+		lblDuelDeChars = new JLabel("Duel de chars");
+		lblDuelDeChars.setForeground(Color.WHITE);
+		lblDuelDeChars.setFont(new Font("Tahoma", Font.BOLD, 20));
+		zoneDAnimation.add(lblDuelDeChars);
+
+		lblAuTourDu = new JLabel("Au tour du char vert");
+		lblAuTourDu.setBounds(10, 572, 217, 36);
+		lblAuTourDu.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(lblAuTourDu);
+
+		panSortiesBoulet = new JPanel();
+		panSortiesBoulet.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panSortiesBoulet.setBounds(10, 619, 231, 116);
+		contentPane.add(panSortiesBoulet);
+		panSortiesBoulet.setLayout(null);
+
+		lblVitesseDuProjectileIm = new JLabel("Vitesse du projectile:");
+		lblVitesseDuProjectileIm.setBounds(10, 11, 136, 14);
+		panSortiesBoulet.add(lblVitesseDuProjectileIm);
+
+		lblPositionDuProjectileIm = new JLabel("Position du projectile en X:");
+		lblPositionDuProjectileIm.setBounds(10, 36, 150, 14);
+		panSortiesBoulet.add(lblPositionDuProjectileIm);
+
+		lblPositionDuProjectile = new JLabel("Position du projectile en Y:");
+		lblPositionDuProjectile.setBounds(10, 61, 150, 14);
+		panSortiesBoulet.add(lblPositionDuProjectile);
+
+		lblPosProjectileX = new JLabel("");
+		lblPosProjectileX.setBounds(170, 36, 51, 14);
+		panSortiesBoulet.add(lblPosProjectileX);
+
+		lblPosProjectileY = new JLabel("");
+		lblPosProjectileY.setBounds(170, 61, 51, 14);
+		panSortiesBoulet.add(lblPosProjectileY);
+
+		lblVitprojectile = new JLabel("");
+		lblVitprojectile.setBounds(156, 11, 65, 14);
+		panSortiesBoulet.add(lblVitprojectile);
+
+		panSortiesChar = new JPanel();
+		panSortiesChar.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panSortiesChar.setBounds(251, 619, 231, 72);
+		contentPane.add(panSortiesChar);
+		panSortiesChar.setLayout(null);
+
+		lblPositionDuChar = new JLabel("Position du char en X:");
+		lblPositionDuChar.setBounds(10, 11, 135, 14);
+		panSortiesChar.add(lblPositionDuChar);
+
+		lblPositionDuChar_1 = new JLabel("Position du char en Y:");
+		lblPositionDuChar_1.setBounds(10, 36, 135, 14);
+		panSortiesChar.add(lblPositionDuChar_1);
+
+		lblPosCharX = new JLabel("");
+		lblPosCharX.setBounds(175, 11, 46, 14);
+		panSortiesChar.add(lblPosCharX);
+
+		lblPosCharY = new JLabel("");
+		lblPosCharY.setBounds(175, 36, 46, 14);
+		panSortiesChar.add(lblPosCharY);
+
+		panSortieTemps = new JPanel();
+		panSortieTemps.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panSortieTemps.setBounds(251, 702, 231, 33);
+		contentPane.add(panSortieTemps);
+		panSortieTemps.setLayout(null);
+
+		lblTempscoul = new JLabel("temps \u00E9coul\u00E9:");
+		lblTempscoul.setBounds(10, 11, 107, 14);
+		panSortieTemps.add(lblTempscoul);
+
+		lblTemps = new JLabel("");
+		lblTemps.setBounds(160, 11, 61, 14);
+		panSortieTemps.add(lblTemps);
+
+		separator = new JSeparator();
+		separator.setBounds(494, 572, 2, 163);
+		separator.setOrientation(SwingConstants.VERTICAL);
+		separator.setBackground(Color.BLACK);
+		contentPane.add(separator);
+
+		separator_1 = new JSeparator();
+		separator_1.setBounds(820, 572, 2, 163);
+		separator_1.setBackground(Color.BLACK);
+		separator_1.setOrientation(SwingConstants.VERTICAL);
+		contentPane.add(separator_1);
+
+		lblNiveauDessence = new JLabel("Niveau d'essence");
+		lblNiveauDessence.setBounds(701, 572, 109, 14);
+		contentPane.add(lblNiveauDessence);
+
+		prgBarNiveauEssence = new JProgressBar();
+		prgBarNiveauEssence.setOrientation(SwingConstants.VERTICAL);
+		prgBarNiveauEssence.setBounds(707, 597, 79, 110);
+		prgBarNiveauEssence.setValue(100);
+		prgBarNiveauEssence.setForeground(Color.RED.darker());
+		contentPane.add(prgBarNiveauEssence);
+
+		btnTirer = new JButton("TIRER!");
+		btnTirer.setBounds(832, 587, 168, 135);
+		btnTirer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				zoneDAnimation.tirer();
+				getFocus();
+			}
+		});
+		contentPane.add(btnTirer);
+
+		btnPlayPause = new JButton("Pause");
+		btnPlayPause.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				if (enPause == false) {
+					// met le pas d'euler a 0 pour stopper l'animation
+					zoneDAnimation.setPasEuler(0);
+					btnPlayPause.setText("Jouer");
+					enPause = true;
+				}else {
+					// remet le pas d'euler a sa valeur de référence
+					zoneDAnimation.setPasEuler(zoneDAnimation.getPAS_EULER_REFERENCE());
+					btnPlayPause.setText("Pause");
+					enPause = false;
+				}
+			}
+		});
+		btnPlayPause.setBounds(1010, 587, 139, 63);
+		contentPane.add(btnPlayPause);
+
+		separator_2 = new JSeparator();
+		separator_2.setBounds(1159, 572, 8, 163);
+		separator_2.setBackground(Color.BLACK);
+		separator_2.setOrientation(SwingConstants.VERTICAL);
+		contentPane.add(separator_2);
+
+		btnPas = new JButton("Avancer d'un pas");
+		btnPas.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (enPause == false) {
+					// met le pas d'euler a 0 pour stopper l'animation
+					zoneDAnimation.setPasEuler(0);
+					btnPlayPause.setText("Jouer");
+					enPause = true;
+				}
+				zoneDAnimation.avancerUnPas(zoneDAnimation.getPAS_EULER_REFERENCE());
+				
+			}
+		});
+		btnPas.setBounds(1010, 661, 139, 61);
+		contentPane.add(btnPas);
+
+		chckbxAfficherLesVecteurs = new JCheckBox("Afficher les vecteurs de forces");
+		chckbxAfficherLesVecteurs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (zoneDAnimation.isAfficherVecteurs() == false) {
+					zoneDAnimation.setAfficherVecteurs(true);
+				} else {
+					zoneDAnimation.setAfficherVecteurs(false);
+				}
+				zoneDAnimation.requestFocus();
+			}
+		});
+		chckbxAfficherLesVecteurs.setBounds(1170, 49, 210, 23);
+		contentPane.add(chckbxAfficherLesVecteurs);
+
+		panGravité = new JPanel();
+		panGravité.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panGravité.setBounds(1170, 78, 244, 63);
+		contentPane.add(panGravité);
+		panGravité.setLayout(null);
+
+		lblForceDeLa = new JLabel("Force de la gravit\u00E9");
+		lblForceDeLa.setBounds(76, 11, 124, 14);
+		panGravité.add(lblForceDeLa);
+
+		panProjectile = new JPanel();
+		panProjectile.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panProjectile.setBounds(1170, 235, 244, 250);
+		contentPane.add(panProjectile);
+		panProjectile.setLayout(null);
+
+		lblVitesseInitialeDu = new JLabel("Vitesse initiale du projectile:");
+		lblVitesseInitialeDu.setBounds(10, 73, 163, 14);
+		panProjectile.add(lblVitesseInitialeDu);
+
+		sliderVitesseProjectile = new JSlider();
+		sliderVitesseProjectile.setMaximum(150);
+		sliderVitesseProjectile.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				zoneDAnimation.setVitesseInitiale(sliderVitesseProjectile.getValue());
+				zoneDAnimation.requestFocus();
+			}
+		});
+		sliderVitesseProjectile.setBounds(10, 98, 224, 26);
+		panProjectile.add(sliderVitesseProjectile);
+
+		lblChargeDuProjectile = new JLabel("Charge du projectile:");
+		lblChargeDuProjectile.setBounds(10, 135, 133, 14);
+		panProjectile.add(lblChargeDuProjectile);
+
+		radioButton = new JRadioButton("+");
+		radioButton.setSelected(true);
+		radioButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				zoneDAnimation.setProjectileChargePlus(true);
+				zoneDAnimation.requestFocus();
+			}
+		});
+		buttonGroup.add(radioButton);
+		radioButton.setBounds(10, 156, 109, 23);
+		panProjectile.add(radioButton);
+
+		radioButton_1 = new JRadioButton("-");
+		radioButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				zoneDAnimation.setProjectileChargePlus(false);
+				zoneDAnimation.requestFocus();
+			}
+		});
+		buttonGroup.add(radioButton_1);
+		radioButton_1.setBounds(121, 156, 109, 23);
+		panProjectile.add(radioButton_1);
+
+		lblChargeGnrPar = new JLabel("Valeur de la charge g\u00E9n\u00E9r\u00E9 par la grenade");
+		lblChargeGnrPar.setBounds(10, 186, 220, 14);
+		panProjectile.add(lblChargeGnrPar);
+
+		spnChampGrenade = new JSpinner();
+		spnChampGrenade.setBounds(10, 211, 224, 26);
+		panProjectile.add(spnChampGrenade);
+		
+				sliMasseBoulet = new JSlider();
+				sliMasseBoulet.setMaximum(50);
+				sliMasseBoulet.setMinimum(1);
+				sliMasseBoulet.setBounds(10, 36, 224, 26);
+				panProjectile.add(sliMasseBoulet);
+				sliMasseBoulet.setValue(15);
+				
+						lblMasseDuProjectile = new JLabel("Masse du projectile:");
+						lblMasseDuProjectile.setBounds(10, 11, 224, 14);
+						panProjectile.add(lblMasseDuProjectile);
+				sliMasseBoulet.addChangeListener(new ChangeListener() {
+					public void stateChanged(ChangeEvent arg0) {
+						zoneDAnimation.setMasseProjectile(sliMasseBoulet.getValue());
+						zoneDAnimation.requestFocus();
+					}
+				});
+
+		panVent = new JPanel();
+		panVent.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panVent.setBounds(1170, 496, 244, 239);
+		contentPane.add(panVent);
+		panVent.setLayout(null);
+
+		composantVent = new Vent();
+		composantVent.setBounds(29, 42, 186, 186);
+		panVent.add(composantVent);
+		
+				chckbxPrsenceDuVent = new JCheckBox("Pr\u00E9sence du vent");
+				chckbxPrsenceDuVent.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						if(zoneDAnimation.isVentActive()) {
+							zoneDAnimation.setVentActive(false);
+						}else {
+							zoneDAnimation.setVentActive(true);
+						}
+						zoneDAnimation.requestFocus();
+					}
+				});
+				chckbxPrsenceDuVent.setBounds(6, 7, 139, 23);
+				panVent.add(chckbxPrsenceDuVent);
+
+		fleches = new Fleches();
+		fleches.setBounds(506, 597, 173, 110);
+		contentPane.add(fleches);
+		
+		panel = new JPanel();
+		panel.setBorder(new TitledBorder(null, "Type de projectile", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.setBounds(1170, 152, 244, 72);
+		contentPane.add(panel);
+		panel.setLayout(null);
+		
+		rdbtnObusExplosif = new JRadioButton("obus explosif");
+		rdbtnObusExplosif.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				zoneDAnimation.setEstGrenadeElectrique(false);
+				zoneDAnimation.requestFocus();
+			}
+		});
+		rdbtnObusExplosif.setSelected(true);
+		buttonGroup_1.add(rdbtnObusExplosif);
+		rdbtnObusExplosif.setBounds(6, 17, 149, 23);
+		panel.add(rdbtnObusExplosif);
+		
+		rdbtnGrenadeElectrique = new JRadioButton("Grenade \u00E9lectrique");
+		rdbtnGrenadeElectrique.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				zoneDAnimation.setEstGrenadeElectrique(true);
+				zoneDAnimation.requestFocus();
+			}
+		});
+		buttonGroup_1.add(rdbtnGrenadeElectrique);
+		rdbtnGrenadeElectrique.setBounds(6, 43, 164, 23);
+		panel.add(rdbtnGrenadeElectrique);
+		
+		lblControle = new JLabel("Controle clavier \r\n");
+		lblControle.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblControle.setBounds(536, 572, 111, 14);
+		contentPane.add(lblControle);
+		
+		zoneDAnimation.setVent(composantVent.getVent());
+	}
+
+	// Andy Lam
+	/**
+	 * Méthode qui permet à cette fenêtre de recevoir le focus
+	 */
+	public void getFocus() {
+		zoneDAnimation.requestFocusInWindow();
+		
+	}
+
+	// Andy Lam
+	/**
+	 * Méthode qui permet de réinitialiser les parametres de l'interface de bataille et du terrain
+	 */
+	public void reinitialiser() {
+		zoneDAnimation.reinitialiser();
+		sliMasseBoulet.setValue(MASSE_INIT_BOULET);
+		sliderVitesseProjectile.setValue(VITESSE_INIT_BOULET);
+		composantVent.ventAleatoire();
+		getFocus();
+	}
+	//Andy Lam
+	/**
+	 * Méthode qui permet de changer le terrain dépandanment selon le choix du terrain
+	 * @param choixTerrain le nom du choix du terrain choisi par l'utilisateur
+	 */
+	public void changeTerrain(String choixTerrain) {
+		zoneDAnimation.reinitialiser();
+		zoneDAnimation.changeTerrain(choixTerrain);
+	}
+	//Andy Lam
+	/**
+	 * Méthode qui retourne qui retourne la fenêtre mère de cette fenêtre 
+	 * @return la fenêtre mère de cette fenêtre
+	 */
+	public App10DuelDeChars getFrame() {
+		return frame;
+	}
+}

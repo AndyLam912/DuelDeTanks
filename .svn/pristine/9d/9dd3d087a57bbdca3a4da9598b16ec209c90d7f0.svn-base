@@ -1,0 +1,250 @@
+package objetsdessinables;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
+
+import interfaces.Dessinable;
+
+/**
+ * classe qui créé un char d'assaut se déplaçant et pouvant bouger son canon
+ * 
+ * @author léo-paul lapointe
+ *
+ */
+public class CharDassaut implements Dessinable {
+	private final int LARGEUR_CANON = 5;
+	private final int LONGUEUR_CANON = 25;
+	private final int LARGEUR_VIE = 5;
+	private final int LONGUEUR_VIE = 30;
+	private final int DISTANCE_CHAR_VIE = 10;
+	private final int NOMBRE_POINT_VIE;
+	private final double SCALE_X = 0.25;
+	private final double SCALE_Y = 0.25;
+	private double x, y;
+	private double angleCanon;
+	private double angleTerrain;
+	private Rectangle2D canon;
+	private Rectangle2D vie;
+	private Image chars = null;
+	private String image;
+	private boolean couleurVert;
+	private boolean mort = false;
+	private int compteurTouche;
+
+	/**
+	 * permet de créer le char
+	 * 
+	 * @param image
+	 *            nom du ficher d'image à utiliser
+	 * @param x
+	 *            position en x du char
+	 * @param y
+	 *            position en y du char
+	 * @param angleTerrain
+	 *            angle du terrain à la position du char
+	 */
+	public CharDassaut(String image, Double x, Double y, Double angleTerrain, int nbPV, boolean couleurVert) {
+		this.image = image;
+		lireImage();
+		this.angleCanon = 0;
+		this.x = x;
+		this.y = y;
+		this.angleTerrain = angleTerrain;
+		this.couleurVert = couleurVert;
+		this.NOMBRE_POINT_VIE = nbPV;
+	}
+
+	/**
+	 * dessine le char
+	 */
+	@Override
+	public void dessiner(Graphics2D g2d, AffineTransform mat) {
+		if(!mort) {
+		AffineTransform matLocaleCanon = new AffineTransform(mat);
+		AffineTransform matLocaleChar = new AffineTransform(mat);
+
+		canon = new Rectangle2D.Double(x, y - getHauteurImgScaled() / 2 - LARGEUR_CANON, LONGUEUR_CANON, LARGEUR_CANON);
+		vie = new Rectangle2D.Double(x - LONGUEUR_VIE/2, y - getHauteurImgScaled() - LARGEUR_VIE - DISTANCE_CHAR_VIE,LONGUEUR_VIE - LONGUEUR_VIE/NOMBRE_POINT_VIE * compteurTouche, LARGEUR_VIE);
+		matLocaleCanon.rotate(angleTerrain, x, y);
+		matLocaleCanon.rotate(angleCanon, x, y - getHauteurImgScaled() / 2 - LARGEUR_CANON / 2);
+		
+		if (couleurVert) g2d.setColor(Color.GREEN.darker());
+		if (!couleurVert) g2d.setColor(Color.RED);
+		g2d.fill(matLocaleCanon.createTransformedShape(canon));
+
+		matLocaleChar.rotate(angleTerrain, x, y);
+		matLocaleChar.translate(x - getLargeurImgScaled() / 2, y - getHauteurImgScaled());
+		matLocaleChar.scale(SCALE_X, SCALE_Y);
+
+		g2d.drawImage(chars, matLocaleChar, null);
+		
+		g2d.setColor(Color.GREEN);
+		g2d.fill(mat.createTransformedShape(vie));
+		}
+	}
+
+	/**
+	 * permet de lire un fichier d'image pour l'aficher
+	 */
+	private void lireImage() {
+		URL fich = getClass().getClassLoader().getResource(image);
+		if (fich == null) {
+			JOptionPane.showMessageDialog(null, "Fichier d'image introuvable!");
+		} else {
+			try {
+				chars = ImageIO.read(fich);
+			} catch (IOException e) {
+				System.out.println("Erreur de lecture du fichier d'image");
+			}
+		}
+	}
+
+	/**
+	 * permet de changer la position du char
+	 * 
+	 * @param x
+	 *            position en x du char
+	 * @param y
+	 *            position en y du char
+	 * @param angleTerrain
+	 *            angle du terrain à la position du char
+	 */
+	public void changerPosition(double x, double y, double angleTerrain) {
+		this.x = x;
+		this.y = y;
+		this.angleTerrain = angleTerrain;
+	}
+	
+	/**
+	 * permet de comptabiliser le nombre de points de vie perdu et fait disparaitre le char quand il n'en a plus
+	 */
+	public void touche() {
+		compteurTouche++;
+		
+		if(compteurTouche == NOMBRE_POINT_VIE) {
+			mort = true;
+		}
+		
+	}
+	
+	
+	/**
+	 * retourne la position en x du char
+	 * 
+	 * @return position en x du char
+	 */
+	public double getX() {
+		return x;
+	}
+
+	/**
+	 * permet de modifier la position en x du char
+	 * 
+	 * @param x
+	 *            position en x du char
+	 */
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	/**
+	 * retourne la position en y du char
+	 * 
+	 * @return position en y du char
+	 */
+	public double getY() {
+		return y;
+	}
+
+	/**
+	 * permet de modifier la position en y du char
+	 * 
+	 * @param x
+	 *            position en y du char
+	 */
+	public void setY(double y) {
+		this.y = y;
+	}
+
+	/**
+	 * retourne l'angle du canon
+	 * 
+	 * @return angle du canon
+	 */
+	public double getAngleCanon() {
+		return angleCanon;
+	}
+
+	/**
+	 * permet de modifier l'angle du canon
+	 * 
+	 * @param angle
+	 *            le nouvel angle
+	 */
+	public void setAngleCanon(double angle) {
+		this.angleCanon = angle;
+	}
+
+	/**
+	 * retourne la largeur du fichier d'image avec son homothétie
+	 * 
+	 * @return la largeur du fichier d'image avec son homothétie
+	 */
+	public double getLargeurImgScaled() {
+		return chars.getWidth(null) * SCALE_X;
+	}
+
+	/**
+	 * retourne la hauteur du fichier d'image avec son homothétie
+	 * 
+	 * @return la hauteur du fichier d'image avec son homothétie
+	 */
+	public double getHauteurImgScaled() {
+		return chars.getHeight(null) * SCALE_Y;
+	}
+
+	/**
+	 * retourne l'angle du terrain à la position du char
+	 * 
+	 * @return l'angle du terrain à la position du char
+	 */
+	public double getAngleTerrain() {
+		return angleTerrain;
+	}
+
+	/**
+	 * permet de modifier l'angle du terrain à la position du char
+	 * 
+	 * @param angleTerrain
+	 *            nouvel angle du terrain à la position du char
+	 */
+	public void setAngleTerrain(double angleTerrain) {
+		this.angleTerrain = angleTerrain;
+	}
+
+	/**
+	 * retourne la longueur du canon
+	 * 
+	 * @return la longueur du canon
+	 */
+	public double getLONGUEUR_CANON() {
+		return LONGUEUR_CANON;
+	}
+
+	/**
+	 * retourne le nombre de fois que le char a été touché
+	 * @return le nombre de fois que le char a été touché
+	 */
+	public int getCompteurTouche() {
+		return compteurTouche;
+	}
+
+}

@@ -1,0 +1,14 @@
+package interfaces;
+
+import java.util.EventListener;
+
+public interface TourListener extends EventListener {
+
+	public void changementTour(boolean tourDuCharVert);
+	
+	public void niveauEssence (int essence);
+	
+	public void disableComposants();
+	
+	public void premierPaint(double gravite);
+}
